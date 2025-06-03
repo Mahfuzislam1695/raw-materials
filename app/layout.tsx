@@ -2,9 +2,10 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'v0 App',
-  description: 'Created with v0',
-  generator: 'v0.dev',
+  title: 'medicine raw-materials - drug internationl limited',
+  description: 'A Next.js application for managing medicine raw materials at Drug International Limited',
+  keywords: ['medicine', 'raw materials', 'drug international limited', 'inventory management'],
+  authors: [{ name: 'mahfuz islam' }],
 }
 
 export default function RootLayout({

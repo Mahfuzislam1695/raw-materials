@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils"
 import {
   AlertCircle,
   BarChart3,
+  ClipboardCheck,
   ClipboardList,
   FileText,
   Home,
@@ -65,9 +66,22 @@ export function Sidebar({ open, setOpen }: SidebarProps) {
       icon: Truck,
       title: "Inbound Shipment",
       children: [
-        { href: "/inbound/notifications", title: "Notifications" },
+        { href: "/inbound", title: "Notifications" },
         { href: "/inbound/receiving", title: "Receiving Process" },
         { href: "/inbound/grn", title: "GRN Management" },
+      ],
+    },
+    {
+      href: "/receiving",
+      icon: ClipboardCheck,
+      title: "Receiving Process",
+      children: [
+        { href: "/receiving", title: "Process Overview" },
+        { href: "/receiving?step=documents", title: "Document Verification" },
+        { href: "/receiving?step=quality", title: "Quality Parameters" },
+        { href: "/receiving?step=cleaning", title: "Material Cleaning" },
+        { href: "/receiving?step=weight", title: "Weight Verification" },
+        { href: "/receiving?step=grn", title: "GRN Generation" },
       ],
     },
     {
@@ -77,7 +91,7 @@ export function Sidebar({ open, setOpen }: SidebarProps) {
       badge: 2,
       badgeColor: "bg-warning text-white",
       children: [
-        { href: "/quality/samples", title: "Sample Management" },
+        { href: "/quality", title: "Sample Management" },
         { href: "/quality/tests", title: "Test Results" },
         { href: "/quality/decisions", title: "QC Decisions" },
         { href: "/quality/rejection", title: "Rejection Management" },
@@ -100,7 +114,7 @@ export function Sidebar({ open, setOpen }: SidebarProps) {
       badge: 5,
       badgeColor: "bg-destructive text-destructive-foreground",
       children: [
-        { href: "/inventory/listing", title: "Inventory Listing" },
+        { href: "/inventory", title: "Inventory Listing" },
         { href: "/inventory/expiry", title: "Expiry Management" },
         { href: "/inventory/retest", title: "Retest Management" },
         { href: "/inventory/adjustments", title: "Adjustments" },
@@ -111,7 +125,7 @@ export function Sidebar({ open, setOpen }: SidebarProps) {
       icon: BarChart3,
       title: "Production",
       children: [
-        { href: "/production/requisition", title: "Department Requisition" },
+        { href: "/production", title: "Department Requisition" },
         { href: "/production/dispensing", title: "Dispensing" },
         { href: "/production/returns", title: "Returns" },
       ],
@@ -121,7 +135,7 @@ export function Sidebar({ open, setOpen }: SidebarProps) {
       icon: FileText,
       title: "Reports",
       children: [
-        { href: "/reports/grn", title: "GRN History" },
+        { href: "/reports", title: "GRN History" },
         { href: "/reports/requisition", title: "Requisition History" },
         { href: "/reports/qa-qc", title: "QA/QC Logs" },
         { href: "/reports/expiry", title: "Expiry Reports" },

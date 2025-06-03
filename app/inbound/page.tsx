@@ -1,19 +1,29 @@
 "use client"
 
+import { Label } from "@/components/ui/label"
+
 import { useState } from "react"
 import { MainLayout } from "@/components/layout/main-layout"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { DataTable } from "@/components/ui/data-table"
 import { StatusBadge } from "@/components/ui/status-badge"
 import { Timeline } from "@/components/ui/timeline"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { Truck, Package, FileText, Scale, CheckCircle2, AlertCircle, Plane, Ship } from "lucide-react"
+import {
+  Truck,
+  Package,
+  FileText,
+  Scale,
+  CheckCircle2,
+  AlertCircle,
+  Plane,
+  Ship,
+  ClipboardCheck,
+  Calendar,
+} from "lucide-react"
+import Link from "next/link"
 
 const incomingShipments = [
   {
@@ -27,6 +37,7 @@ const incomingShipments = [
     trackingNumber: "AC123456789",
     invoiceNumber: "INV-2023-001",
     packingListRef: "PL-2023-001",
+    estimatedArrival: "7 days",
   },
   {
     id: "SH-2023-05-028",
@@ -39,6 +50,7 @@ const incomingShipments = [
     trackingNumber: "SC987654321",
     invoiceNumber: "INV-2023-002",
     packingListRef: "PL-2023-002",
+    estimatedArrival: "15 days",
   },
   {
     id: "SH-2023-05-025",
@@ -51,6 +63,7 @@ const incomingShipments = [
     trackingNumber: "AC555666777",
     invoiceNumber: "INV-2023-003",
     packingListRef: "PL-2023-003",
+    estimatedArrival: "7 days",
   },
 ]
 
@@ -81,6 +94,20 @@ const shipmentsColumns = [
         <div className="flex items-center gap-2">
           <Icon className="h-4 w-4" />
           {mode}
+        </div>
+      )
+    },
+  },
+  {
+    accessorKey: "estimatedArrival",
+    header: "Est. Arrival",
+    cell: ({ row }) => {
+      const mode = row.original.mode
+      const days = mode === "Air" ? "7 days" : "15 days"
+      return (
+        <div className="flex items-center gap-2">
+          <Calendar className="h-4 w-4 text-muted-foreground" />
+          <span>{days}</span>
         </div>
       )
     },
@@ -201,6 +228,13 @@ const receivingTimelineItems = [
     status: "completed",
   },
   {
+    title: "Quality Parameters Verified",
+    description: "23-point quality checklist completed",
+    icon: ClipboardCheck,
+    date: "2023-06-01 09:45",
+    status: "completed",
+  },
+  {
     title: "Material Cleaning",
     description: "External packaging cleaning in progress",
     icon: Package,
@@ -234,9 +268,11 @@ export default function InboundPage() {
           <Button variant="outline" size="sm">
             Export Report
           </Button>
-          <Button size="sm">
-            <Package className="mr-2 h-4 w-4" />
-            Manual Entry
+          <Button size="sm" asChild>
+            <Link href="/receiving">
+              <ClipboardCheck className="mr-2 h-4 w-4" />
+              Start Receiving Process
+            </Link>
           </Button>
         </div>
       </div>
@@ -289,8 +325,8 @@ export default function InboundPage() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
         <TabsList>
-          <TabsTrigger value="notifications">Shipment Notifications</TabsTrigger>
-          <TabsTrigger value="receiving">Receiving Process</TabsTrigger>
+          <TabsTrigger value="notifications">Incoming Shipments</TabsTrigger>
+          <TabsTrigger value="receiving">Receiving Timeline</TabsTrigger>
           <TabsTrigger value="grn">GRN Management</TabsTrigger>
           <TabsTrigger value="details">Shipment Details</TabsTrigger>
         </TabsList>
@@ -299,6 +335,9 @@ export default function InboundPage() {
           <Card>
             <CardHeader>
               <CardTitle>Incoming Shipments</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Air shipments typically arrive within 7 days, ship shipments within 15 days
+              </p>
             </CardHeader>
             <CardContent>
               <DataTable
@@ -312,87 +351,32 @@ export default function InboundPage() {
         </TabsContent>
 
         <TabsContent value="receiving" className="mt-6">
-          <div className="grid gap-6 lg:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Material Receiving Process</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <form className="space-y-4">
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="shipmentId">Shipment ID</Label>
-                      <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select shipment" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="SH-2023-05-028">SH-2023-05-028</SelectItem>
-                          <SelectItem value="SH-2023-05-025">SH-2023-05-025</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="receivedBy">Received By</Label>
-                      <Input id="receivedBy" placeholder="Enter your name" />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="receivedDate">Received Date</Label>
-                      <Input id="receivedDate" type="datetime-local" />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="receivedQty">Received Quantity</Label>
-                      <Input id="receivedQty" placeholder="Enter quantity" />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="cleaningNotes">Cleaning Process Notes</Label>
-                    <Textarea
-                      id="cleaningNotes"
-                      placeholder="Document cleaning process and any observations..."
-                      rows={3}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="weightVerification">Weight Verification</Label>
-                    <div className="grid gap-2 md:grid-cols-3">
-                      <Input placeholder="Expected weight" />
-                      <Input placeholder="Actual weight" />
-                      <Input placeholder="Variance" disabled />
-                    </div>
-                  </div>
-
-                  <div className="flex justify-end gap-2">
-                    <Button variant="outline" type="button">
-                      Save Progress
-                    </Button>
-                    <Button type="submit">Complete Receiving</Button>
-                  </div>
-                </form>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Receiving Timeline</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Timeline items={receivingTimelineItems} />
-              </CardContent>
-            </Card>
-          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Receiving Process Timeline</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Updated receiving process with quality parameters verification
+              </p>
+            </CardHeader>
+            <CardContent>
+              <Timeline items={receivingTimelineItems} />
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="grn" className="mt-6">
           <Card>
             <CardHeader>
               <CardTitle>Goods Received Notes (GRN)</CardTitle>
-              <Button size="sm">Generate New GRN</Button>
+              <Button
+                size="sm"
+                onClick={() => {
+                  const grnNumber = `GRN-${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, "0")}-${String(Math.floor(Math.random() * 1000)).padStart(3, "0")}`
+                  alert(`New GRN Generated!\nGRN Number: ${grnNumber}\nStatus: Ready for processing`)
+                }}
+              >
+                Generate New GRN
+              </Button>
             </CardHeader>
             <CardContent>
               <DataTable
@@ -459,36 +443,47 @@ export default function InboundPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Temperature & Storage Requirements</CardTitle>
+                <CardTitle>Arrival Time Estimates</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div className="p-4 border rounded-lg">
                     <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium">Storage Temperature</h4>
-                      <Badge variant="secondary">2-8°C</Badge>
+                      <h4 className="font-medium flex items-center gap-2">
+                        <Plane className="h-4 w-4" />
+                        Air Shipments
+                      </h4>
+                      <Badge variant="secondary">7 Days</Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      Cold storage required. Monitor temperature continuously.
+                      Air freight typically arrives at the factory within 7 days of dispatch.
                     </p>
                   </div>
 
                   <div className="p-4 border rounded-lg">
                     <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium">Humidity Control</h4>
-                      <Badge variant="secondary">{"<"}60% RH</Badge>
+                      <h4 className="font-medium flex items-center gap-2">
+                        <Ship className="h-4 w-4" />
+                        Ship Shipments
+                      </h4>
+                      <Badge variant="secondary">15 Days</Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      Maintain relative humidity below 60% to prevent degradation.
+                      Sea freight typically takes 15 days to arrive at the factory and be received.
                     </p>
                   </div>
 
-                  <div className="p-4 border rounded-lg">
+                  <div className="p-4 border rounded-lg bg-blue-50">
                     <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium">Light Protection</h4>
-                      <Badge variant="secondary">Required</Badge>
+                      <h4 className="font-medium">Planning Notes</h4>
+                      <Calendar className="h-4 w-4 text-blue-600" />
                     </div>
-                    <p className="text-sm text-muted-foreground">Store in amber containers or dark storage areas.</p>
+                    <ul className="text-sm space-y-1 text-muted-foreground">
+                      <li>• Air shipments: Plan receiving within 7 days</li>
+                      <li>• Ship shipments: Plan receiving within 15 days</li>
+                      <li>• Factor in customs clearance time</li>
+                      <li>• Coordinate with warehouse capacity</li>
+                    </ul>
                   </div>
                 </div>
               </CardContent>

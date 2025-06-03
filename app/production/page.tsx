@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Factory, Scale, ArrowLeft, CheckCircle2, Package, Users } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 const departmentRequisitions = [
   {
@@ -276,6 +277,10 @@ const dispensingTimelineItems = [
 
 export default function ProductionPage() {
   const [activeTab, setActiveTab] = useState("requisition")
+  const [showApprovalDialog, setShowApprovalDialog] = useState(false)
+  const [showDispensingDialog, setShowDispensingDialog] = useState(false)
+  const [showReturnDialog, setShowReturnDialog] = useState(false)
+  const [selectedRequisition, setSelectedRequisition] = useState(null)
 
   return (
     <MainLayout>
@@ -495,10 +500,25 @@ export default function ProductionPage() {
                 </div>
 
                 <div className="flex justify-end gap-2">
-                  <Button variant="outline" type="button">
+                  <Button
+                    variant="outline"
+                    type="button"
+                    onClick={() => {
+                      // Save progress
+                      console.log("Saving dispensing progress")
+                    }}
+                  >
                     Save Progress
                   </Button>
-                  <Button type="submit">Complete Dispensing</Button>
+                  <Button
+                    type="submit"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      setShowDispensingDialog(true)
+                    }}
+                  >
+                    Complete Dispensing
+                  </Button>
                 </div>
               </form>
             </CardContent>
@@ -563,10 +583,25 @@ export default function ProductionPage() {
                   </div>
 
                   <div className="flex justify-end gap-2">
-                    <Button variant="outline" type="button">
+                    <Button
+                      variant="outline"
+                      type="button"
+                      onClick={() => {
+                        // Save draft
+                        console.log("Saving return draft")
+                      }}
+                    >
                       Save Draft
                     </Button>
-                    <Button type="submit">Process Return</Button>
+                    <Button
+                      type="submit"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        setShowReturnDialog(true)
+                      }}
+                    >
+                      Process Return
+                    </Button>
                   </div>
                 </form>
               </CardContent>
@@ -591,13 +626,34 @@ export default function ProductionPage() {
                       Production Unit B requesting 25 kg Amoxicillin API
                     </p>
                     <div className="flex gap-2">
-                      <Button size="sm" variant="default">
+                      <Button
+                        size="sm"
+                        variant="default"
+                        onClick={() => {
+                          setSelectedRequisition("DEPT-REQ-002")
+                          setShowApprovalDialog(true)
+                        }}
+                      >
                         Approve
                       </Button>
-                      <Button size="sm" variant="outline">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          // Handle rejection
+                          console.log("Rejecting DEPT-REQ-002")
+                        }}
+                      >
                         Reject
                       </Button>
-                      <Button size="sm" variant="outline">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          // Request more info
+                          console.log("Requesting info for DEPT-REQ-002")
+                        }}
+                      >
                         Request Info
                       </Button>
                     </div>
@@ -657,6 +713,96 @@ export default function ProductionPage() {
           </div>
         </TabsContent>
       </Tabs>
+
+      <Dialog open={showApprovalDialog} onOpenChange={setShowApprovalDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Approve Requisition</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="p-3 bg-green-50 rounded-lg">
+              <h4 className="font-medium">Requisition: {selectedRequisition}</h4>
+              <p className="text-sm text-muted-foreground">Production Unit B - 25 kg Amoxicillin API</p>
+            </div>
+            <div className="space-y-2">
+              <Label>Approved Quantity</Label>
+              <Input placeholder="25 kg" />
+            </div>
+            <div className="space-y-2">
+              <Label>Approval Notes</Label>
+              <Textarea placeholder="Enter approval notes..." />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowApprovalDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={() => setShowApprovalDialog(false)}>Approve Requisition</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showDispensingDialog} onOpenChange={setShowDispensingDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Dispensing</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="p-3 bg-blue-50 rounded-lg">
+              <h4 className="font-medium">Dispensing Confirmation</h4>
+              <p className="text-sm text-muted-foreground">Please verify all details before completing</p>
+            </div>
+            <div className="space-y-2">
+              <Label>Digital Signature</Label>
+              <Input placeholder="Enter your digital signature" />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowDispensingDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  setShowDispensingDialog(false)
+                  console.log("Dispensing completed")
+                }}
+              >
+                Complete Dispensing
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showReturnDialog} onOpenChange={setShowReturnDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Return</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="p-3 bg-blue-50 rounded-lg">
+              <h4 className="font-medium">Return Confirmation</h4>
+              <p className="text-sm text-muted-foreground">Please verify all details before completing</p>
+            </div>
+            <div className="space-y-2">
+              <Label>Digital Signature</Label>
+              <Input placeholder="Enter your digital signature" />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowReturnDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  setShowReturnDialog(false)
+                  console.log("Return completed")
+                }}
+              >
+                Complete Return
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </MainLayout>
   )
 }

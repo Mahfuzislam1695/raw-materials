@@ -10,6 +10,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { ShieldCheck, TestTube, AlertTriangle, CheckCircle2, XCircle, Clock } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
+import { SampleTrackingCard } from "@/components/ui/sample-tracking-card"
+import { Separator } from "@/components/ui/separator"
 
 const qcSamples = [
   {
@@ -18,12 +25,20 @@ const qcSamples = [
     batch: "PCM-2023-01",
     sampleId: "S-PCM-001",
     grn: "GRN-2023-001",
+    sourceLocation: "quarantine",
+    warehouse: "WH-Q1",
+    zone: "Zone-A",
+    rack: "R-001",
+    level: "L-02",
+    sampleQuantity: "500g",
+    availableQuantity: "25.5kg",
     samplingDate: "2023-06-01",
-    testType: "Identity, Assay, Impurities",
+    testType: "Retest - Identity, Assay, Impurities",
     status: "testing",
     priority: "High",
     analyst: "Dr. Sarah Wilson",
     expectedCompletion: "2023-06-03",
+    reason: "Retest after quarantine period",
   },
   {
     id: "QC-2023-002",
@@ -31,12 +46,20 @@ const qcSamples = [
     batch: "AMX-2023-01",
     sampleId: "S-AMX-001",
     grn: "GRN-2023-002",
+    sourceLocation: "stock",
+    warehouse: "WH-S1",
+    zone: "Zone-B",
+    rack: "R-015",
+    level: "L-03",
+    sampleQuantity: "250g",
+    availableQuantity: "48.2kg",
     samplingDate: "2023-05-28",
-    testType: "Microbiological, Assay",
+    testType: "Pre-production - Microbiological, Assay",
     status: "completed",
     priority: "Medium",
     analyst: "Dr. Michael Brown",
     expectedCompletion: "2023-05-30",
+    reason: "Pre-production testing for Batch PD-2023-15",
   },
   {
     id: "QC-2023-003",
@@ -44,12 +67,20 @@ const qcSamples = [
     batch: "IBU-2023-01",
     sampleId: "S-IBU-001",
     grn: "GRN-2023-003",
+    sourceLocation: "quarantine",
+    warehouse: "WH-Q1",
+    zone: "Zone-A",
+    rack: "R-003",
+    level: "L-01",
+    sampleQuantity: "300g",
+    availableQuantity: "19.7kg",
     samplingDate: "2023-05-25",
-    testType: "Identity, Assay, Dissolution",
+    testType: "Initial Test - Identity, Assay, Dissolution",
     status: "pending",
     priority: "Low",
     analyst: "Dr. Lisa Johnson",
     expectedCompletion: "2023-05-27",
+    reason: "Initial testing after receiving",
   },
 ]
 
@@ -65,6 +96,26 @@ const qcSamplesColumns = [
   {
     accessorKey: "batch",
     header: "Batch",
+  },
+  {
+    accessorKey: "sourceLocation",
+    header: "Source",
+    cell: ({ row }) => {
+      const source = row.getValue("sourceLocation")
+      return (
+        <Badge variant={source === "quarantine" ? "secondary" : "default"}>
+          {source === "quarantine" ? "Quarantine" : "Stock"}
+        </Badge>
+      )
+    },
+  },
+  {
+    accessorKey: "sampleQuantity",
+    header: "Sample Qty",
+  },
+  {
+    accessorKey: "availableQuantity",
+    header: "Available Qty",
   },
   {
     accessorKey: "testType",
@@ -233,6 +284,7 @@ const qcDecisionsColumns = [
 
 export default function QualityPage() {
   const [activeTab, setActiveTab] = useState("samples")
+  const [showNewSampleDialog, setShowNewSampleDialog] = useState(false)
 
   return (
     <MainLayout>
@@ -242,10 +294,138 @@ export default function QualityPage() {
           <Button variant="outline" size="sm">
             Generate Report
           </Button>
-          <Button size="sm">
-            <TestTube className="mr-2 h-4 w-4" />
-            New Sample
-          </Button>
+          <Dialog open={showNewSampleDialog} onOpenChange={setShowNewSampleDialog}>
+            <DialogTrigger asChild>
+              <Button size="sm">
+                <TestTube className="mr-2 h-4 w-4" />
+                New Sample
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Create New QC Sample</DialogTitle>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="source-location">Source Location</Label>
+                    <Select>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select source" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="quarantine">Quarantine (Retest)</SelectItem>
+                        <SelectItem value="stock">Stock (Pre-production)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="material">Material</Label>
+                    <Select>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select material" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="paracetamol">Paracetamol API</SelectItem>
+                        <SelectItem value="amoxicillin">Amoxicillin API</SelectItem>
+                        <SelectItem value="ibuprofen">Ibuprofen API</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="batch">Batch Number</Label>
+                    <Input id="batch" placeholder="Enter batch number" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="warehouse">Warehouse</Label>
+                    <Select>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select warehouse" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="WH-Q1">WH-Q1 (Quarantine)</SelectItem>
+                        <SelectItem value="WH-S1">WH-S1 (Stock)</SelectItem>
+                        <SelectItem value="WH-M1">WH-M1 (Mixed)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="zone">Zone</Label>
+                    <Input id="zone" placeholder="Zone" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="rack">Rack</Label>
+                    <Input id="rack" placeholder="Rack" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="level">Level</Label>
+                    <Input id="level" placeholder="Level" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="available-qty">Available Qty</Label>
+                    <Input id="available-qty" placeholder="e.g., 25.5kg" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="sample-qty">Sample Quantity</Label>
+                    <Input id="sample-qty" placeholder="e.g., 500g" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="priority">Priority</Label>
+                    <Select>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select priority" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="high">High</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="low">Low</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="test-type">Test Type</Label>
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select test type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="identity-assay">Identity & Assay</SelectItem>
+                      <SelectItem value="microbiological">Microbiological</SelectItem>
+                      <SelectItem value="dissolution">Dissolution</SelectItem>
+                      <SelectItem value="impurities">Impurities</SelectItem>
+                      <SelectItem value="full-analysis">Full Analysis</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="reason">Reason for Testing</Label>
+                  <Textarea
+                    id="reason"
+                    placeholder="Enter reason (e.g., Retest after quarantine period, Pre-production testing for Batch PD-2023-15)"
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={() => setShowNewSampleDialog(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={() => setShowNewSampleDialog(false)}>Create Sample</Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
@@ -304,19 +484,75 @@ export default function QualityPage() {
         </TabsList>
 
         <TabsContent value="samples" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>QC Samples</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <DataTable
-                columns={qcSamplesColumns}
-                data={qcSamples}
-                searchColumn="material"
-                searchPlaceholder="Search samples..."
-              />
-            </CardContent>
-          </Card>
+          <div className="grid gap-6 lg:grid-cols-3">
+            <div className="lg:col-span-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle>QC Samples</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <DataTable
+                    columns={qcSamplesColumns}
+                    data={qcSamples}
+                    searchColumn="material"
+                    searchPlaceholder="Search samples..."
+                  />
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Sample Source Summary</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">From Quarantine (Retests)</span>
+                      <Badge variant="secondary">
+                        {qcSamples.filter((s) => s.sourceLocation === "quarantine").length}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">From Stock (Pre-production)</span>
+                      <Badge variant="default">{qcSamples.filter((s) => s.sourceLocation === "stock").length}</Badge>
+                    </div>
+                    <Separator />
+                    <div className="text-xs text-muted-foreground">
+                      Sample quantities are automatically deducted from inventory for audit transparency
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recent Sample Details</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {qcSamples.slice(0, 2).map((sample) => (
+                      <SampleTrackingCard
+                        key={sample.id}
+                        sampleId={sample.sampleId}
+                        material={sample.material}
+                        batch={sample.batch}
+                        sourceLocation={sample.sourceLocation}
+                        warehouse={sample.warehouse}
+                        zone={sample.zone}
+                        rack={sample.rack}
+                        level={sample.level}
+                        sampleQuantity={sample.sampleQuantity}
+                        availableQuantity={sample.availableQuantity}
+                        reason={sample.reason}
+                      />
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </TabsContent>
 
         <TabsContent value="results" className="mt-6">
