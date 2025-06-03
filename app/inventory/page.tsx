@@ -668,7 +668,7 @@ export default function InventoryPage() {
               />
             </CardContent>
             {/* Expiry Management Section */}
-            <div className="mt-6">
+            <div className="mt-4 p-4">
               <h3 className="text-lg font-semibold mb-4">Expiry Management</h3>
               <div className="grid gap-6 lg:grid-cols-3">
                 <Card className="border-destructive/20">
