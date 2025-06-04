@@ -314,8 +314,9 @@ export default function QualityPage() {
                         <SelectValue placeholder="Select source" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="quarantine">Quarantine (Retest)</SelectItem>
-                        <SelectItem value="stock">Stock (Pre-production)</SelectItem>
+                        <SelectItem value="quarantine-retest">Quarantine (Retest)</SelectItem>
+                        <SelectItem value="quarantine-test">Quarantine (Test)</SelectItem>
+                        {/* <SelectItem value="stock">Stock (Pre-production)</SelectItem> */}
                       </SelectContent>
                     </Select>
                   </div>
